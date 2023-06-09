@@ -108,10 +108,7 @@ class Chain(namedtuple('Chain', ('links', 'base', 'tool'))):
                 e = best_e.copy()
                 alpha *= 0.5
 
-            if use_pinv:
-                dq = numpy.linalg.pinv(self._jacob0(q)) * e.reshape((-1, 1))
-            else:
-                dq = self._jacob0(q).T * e.reshape((-1, 1))
+            dq = numpy.linalg.pinv(self._jacob0(q)) * e.reshape((-1, 1)) if use_pinv else self._jacob0(q).T * e.reshape((-1, 1))
             q += alpha * dq
 
             # d = numpy.linalg.norm(dq)
@@ -124,9 +121,7 @@ class Chain(namedtuple('Chain', ('links', 'base', 'tool'))):
     def _jacob0(self, q):
         Jn = self._jacobn(q)
         Rn = rotation_from_transf(self.forward_kinematics(q)[0])
-
-        return numpy.concatenate((numpy.concatenate((Rn, numpy.zeros((3, 3))), axis=1),
-                                  numpy.concatenate((numpy.zeros((3, 3)), Rn), 1))) * Jn
+        return numpy.concatenate((numpy.concatenate((Rn, numpy.zeros((3, 3))), axis=1), numpy.concatenate((numpy.zeros((3, 3)), Rn), 1))) * Jn
 
     def _jacobn(self, q):
         q = numpy.array(q).flatten()
